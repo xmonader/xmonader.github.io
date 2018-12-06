@@ -7,9 +7,10 @@ categories: nim
 
 ## Background
 
-I'm a software engineer at [threefoldtech](https://threefold.io) and I'm the author of [Nim Days](https://xmonader.github.io/nimdays)
+I'm a software engineer at [ThreeFoldTech](https://threefold.io) and the author of [Nim Days](https://xmonader.github.io/nimdays)
 
-One of the projects we develop at threefoldtech is [Zero-OS](https://github.com/threefoldtech/0-core) a stateless Linux operating system designed for clustered deployments to host virtual machines and containerized applications. We wanted to have a CLI (like docker) to manage the containers and communicate with zero-os instead of using Python client.
+One of the projects we develop at ThreeFoldTech is [Zero-OS](https://github.com/threefoldtech/0-core) a stateless Linux operating system designed for clustered deployments to host virtual machines and containerized applications.
+We wanted to have a CLI (like docker) to manage the containers and communicate with zero-os instead of using Python client.
 
 
 ## Application requirements
@@ -21,7 +22,7 @@ One of the projects we develop at threefoldtech is [Zero-OS](https://github.com/
 - tabular output for humans (listing containers and such) 
 - support json output when needed too (for further manipulation by tools like jq)
 
-So it all seems simple enough any language would be just fine
+Sounds simple enough. Any language would do just fine
 
 
 ## Choosing Nim
@@ -34,14 +35,18 @@ From [Nim](https://nim-lang.org) website
 - Produces dependency-free binaries
 - Runs on Windows, macOS, Linux, and more
 
-This sounds promising so we gave it a try
+
+
+In the upcoming sections, I'll talk about the good, the okay, and the hard points I faced while developing this simple CLI application with the requirements above.
 
 
 ## The good
 
-### Nim is expressive and statically typed
-Nim is like python but eliminates a whole class of errors by being statically typed (while maintaing expressiveness)
- (whitespace sensitive language) and there's even a guide on the official repo [Nim for Python programmers](https://github.com/nim-lang/Nim/wiki/Nim-for-Python-Programmers). Seeing some of pascal concepts in Nim gets me very nostalgic too. 
+### Static typing
+Nim eliminates a whole class of errors by being statically typed
+
+### Expressiveness 
+Nim is like python (whitespace sensitive language) and there's even a guide on the official repo [Nim for Python programmers](https://github.com/nim-lang/Nim/wiki/Nim-for-Python-Programmers). Seeing some of Pascal concepts in Nim gets me very nostalgic too.
 
 {% highlight nim %}
 import strutils, strformat, os, ospaths, osproc, tables, parsecfg, json, marshal, logging
@@ -63,7 +68,7 @@ proc checkContainerExists*(this:App, containerid:int): bool=
 {% endhighlight %}
 
 
-I consider UFCS (Uniform Function Call Syntax) expressive too [excellent nim basics](https://narimiran.github.io/nim-basics/)
+I find UFCS (Uniform Function Call Syntax) really great too [excellent nim basics](https://narimiran.github.io/nim-basics/)
 
 {% highlight nim %}
 proc plus(x, y: int): int =  # <1>
@@ -85,7 +90,7 @@ echo a.plus(b).multi(c)  # <2>
 echo c.multi(b).plus(a)  # <3>
 {% endhighlight %}
 
-Also case insensitivity toUpper toupper to_upper is pretty neat
+Also case insensitivity `toUpper` `toupper` `to_upper` is pretty neat
 > I don't use the same identifier with different cases in the same scope 
 
 
@@ -101,13 +106,14 @@ type ContainerInfo* = object of RootObj
   ports*: string
 {% endhighlight %}
 
-I like they way of defining types, enums and access control `*` means public.
+I like the way of defining types, enums and access control `*` means public.
 
-## Developing sync, async in the same interface
 
-> Pragmas are Nim's method to give the compiler additional information / commands without introducing a massive number of new keywords. Pragmas are processed on the fly during semantic checking. Pragmas are enclosed in the special {. and .} curly brackets. Pragmas are also often used as a first implementation to play with a language feature before a nicer syntax to access the feature becomes available.
+### Developing sync, async in the same interface
 
-I'm a fan on `multisync` pragma because it allows you to define procs for async, sync code easily
+> Pragmas are Nim's method to give the compiler additional information/commands without introducing a massive number of new keywords. Pragmas are processed on the fly during semantic checking. Pragmas are enclosed in the special {. and .} curly brackets. Pragmas are also often used as a first implementation to play with a language feature before a nicer syntax to access the feature becomes available.
+
+I'm a fan of `multisync` pragma because it allows you to define procs for async, sync code easily
 
 {% highlight nim %}
 
@@ -121,22 +127,143 @@ proc readMany(this:Redis|AsyncRedis, count:int=1): Future[string] {.multisync.} 
 {% endhighlight %}
 Basically in sync execution multisync with remove Future, and await from the code definition and will leave them in case of async execution
 
+### The tooling
+
+#### vscode-nim
+[vscode-nim](https://github.com/pragmagic/vscode-nim) is my daily driver, works as expected, but sometimes it consumes so much memory. there's also [LSP](https://github.com/PMunch/nimlsp) in the works 
+
+#### nimble
+Everything you expect from the package manager, creating projects, custom tasks, managing dependencies and publishing (too coupled with github, but that's fine with me)
+
+
 ## the OK
-These are the OK parts that can be better
+These are the OK parts that can be improved in my opinion
 
 ### Documentation
-There's a great community effort to provide [documentation](https://nim-lang.org/documentation.html) I hope we get more and more soft documentation and better quality on the official docs too.
+There's a great community effort to provide [documentation](https://nim-lang.org/documentation.html). I hope we get more and more soft documentation and better quality on the official docs too.
 
-### The tooling
-I've been only relying on [vscode-nim](https://github.com/pragmagic/vscode-nim) only it works fine as expected but sometimes it consumes so much memory on my 8GB machine and
+#### Generating documentation
+[nim doc](https://nim-lang.org/docs/docgen.html) is what I used to generate documentation for the project
+`nim doc --project src/zos.nim` will generate project documentation for `zos.nim` and all related modules for the project.
 
-### weird symbols / json
-Nim uses unreadable symbols `%*` and `$$` as procs in json i don't mind typing dump or load even [serializing tables](https://github.com/nim-lang/Nim/pull/7203) needs a bit of work 
+{% highlight bash %}
+nim doc src/zos.nim 
+Hint: used config file '/home/xmonader/.choosenim/toolchains/nim-0.19.0/config/nim.cfg' [Conf]
+Hint: used config file '/home/xmonader/.choosenim/toolchains/nim-0.19.0/config/nimdoc.cfg' [Conf]
+Hint: system [Processing]
+Hint: zos [Processing]
+Hint: strutils [Processing]
+Hint: parseutils [Processing]
+Hint: math [Processing]
+Hint: bitops [Processing]
+Hint: algorithm [Processing]
+Hint: unicode [Processing]
+Hint: strformat [Processing]
+Hint: macros [Processing]
+Hint: os [Processing]
+Hint: times [Processing]
+Hint: options [Processing]
+Hint: typetraits [Processing]
+Hint: posix [Processing]
+Hint: ospaths [Processing]
+Hint: osproc [Processing]
+Hint: strtabs [Processing]
+Hint: hashes [Processing]
+Hint: streams [Processing]
+Hint: cpuinfo [Processing]
+Hint: linux [Processing]
+Hint: tables [Processing]
+Hint: parsecfg [Processing]
+Hint: lexbase [Processing]
+Hint: json [Processing]
+Hint: parsejson [Processing]
+Hint: marshal [Processing]
+Hint: typeinfo [Processing]
+Hint: intsets [Processing]
+Hint: logging [Processing]
+Hint: net [Processing]
+Hint: nativesockets [Processing]
+Hint: winlean [Processing]
+Hint: dynlib [Processing]
+Hint: sets [Processing]
+Hint: openssl [Processing]
+Hint: asyncdispatch [Processing]
+Hint: heapqueue [Processing]
+Hint: lists [Processing]
+Hint: asyncstreams [Processing]
+Hint: asyncfutures [Processing]
+Hint: deques [Processing]
+Hint: cstrutils [Processing]
+Hint: asyncnet [Processing]
+Hint: threadpool [Processing]
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(13, 10) Error: Threadpool requires --threads:on option.
+Hint: cpuload [Processing]
+Hint: locks [Processing]
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(67, 26) Error: undeclared identifier: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(67, 31) Error: attempting to call undeclared routine: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(67, 31) Error: attempting to call undeclared routine: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(67, 31) Error: expression 'fence' cannot be called
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(78, 8) Error: attempting to call undeclared routine: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(78, 8) Error: attempting to call undeclared routine: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(78, 8) Error: expression 'fence' cannot be called
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(81, 10) Error: attempting to call undeclared routine: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(81, 10) Error: attempting to call undeclared routine: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(81, 10) Error: expression 'fence' cannot be called
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(83, 10) Error: attempting to call undeclared routine: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(83, 10) Error: attempting to call undeclared routine: 'fence'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(83, 10) Error: expression 'fence' cannot be called
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(360, 37) Error: undeclared identifier: 'Thread'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(360, 43) Error: no generic parameters allowed for Thread
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(363, 54) Error: no generic parameters allowed for Thread
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(391, 3) Error: undeclared identifier: 'createThread'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(391, 15) Error: attempting to call undeclared routine: 'createThread'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(391, 15) Error: attempting to call undeclared routine: 'createThread'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(391, 15) Error: expression 'createThread' cannot be called
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(404, 15) Error: attempting to call undeclared routine: 'createThread'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(404, 15) Error: attempting to call undeclared routine: 'createThread'
+../../../.choosenim/toolchains/nim-0.19.0/lib/pure/concurrency/threadpool.nim(404, 15) Error: expression 'createThread' cannot be called
+Hint: uri [Processing]
+Hint: base64 [Processing]
+Hint: redisclient [Processing]
+Hint: redisparser [Processing]
+Hint: sequtils [Processing]
+Hint: docopt [Processing]
+Hint: nre [Processing]
+Hint: pcre [Processing]
+Hint: util [Processing]
+Hint: util [Processing]
+Hint: logger [Processing]
+Hint: settings [Processing]
+Hint: apphelp [Processing]
+Hint: errorcodes [Processing]
+Hint: sshexec [Processing]
+Hint: hostnamegenerator [Processing]
+Hint: random [Processing]
+Hint: app [Processing]
+Hint: asciitables [Processing]
+Hint: zosclient [Processing]
+Hint: uuids [Processing]
+Hint: isaac [Processing]
+Hint: urandom [Processing]
+Hint: vbox [Processing]
 
-### Error messages
-Sometimes the error messages aren't good enough for instance I got [i is not accessible](https://github.com/nim-lang/Nim/blob/27b081d1f77604ee47c886e69dbc52f53ea3741f/lib/system/chcks.nim#L21) and even with using `writeStackTrace` I couldn't get anything useful so I grepped the codebase where `accessible` comes from.
+{% endhighlight %} 
+No idea why `generating docs` gives these errors so I went with my gut feeling and `--threads:on` and it works fine, pretty searchable documentation 
 
-another example was this 
+{% highlight nim%}
+task genDocs, "Create code documentation for zos":
+    exec "nim doc  --threads:on --project src/zos.nim "
+{% endhighlight %}
+
+
+
+### Weird symbols / json
+Nim chooses unreadable symbols `%*` and `$$` over clear names like dumps or loads :(
+
+### Error Messages
+Sometimes the error messages aren't good enough. For instance, I got [i is not accessible](https://github.com/nim-lang/Nim/blob/27b081d1f77604ee47c886e69dbc52f53ea3741f/lib/system/chcks.nim#L21) and even with using `writeStackTrace` I couldn't get anything useful. So I grepped the codebase where `accessible` comes from and continued from there.
+
+Another example was this 
 {% highlight bash %}
 timeddoutable.nim(44, 16) template/generic instantiation from here
 timeddoutable.nim(34, 6) Error: type mismatch: got <Thread[ptr Channel[system.bool]], proc (cancelChan: ptr Channel[system.bool]):bool{.gcsafe, locks: 0.}, ptr Channel[system.bool]>
@@ -153,15 +280,16 @@ proc createThread(t: var Thread[void]; tp: proc () {.thread, nimcall.})
 
 expression: createThread(t, p, addr(cancelChan))
 {% endhighlight %}
-While the error is clear I just had hard time reading it
+While the error is clear I just had a hard time reading it
 
-## The Hard
-These are the pain points I faced 
+## The Hard 
+
+I really considered switching to language with a more mature ecosystem for these points (multiple times) 
 
 ### Static linking
 Nim promises `Produces dependency-free binaries` as stated on its website, but getting a static linked binary is hard, and undocumented process while it was one of the cases I hoped to use Nim for. 
 
-I managed to statically build with PCRE and SSL [with lots of help from the community](https://github.com/kaushalmodi/hello_musl). 
+I managed to statically link with PCRE and SSL [with lots of help from the community](https://github.com/kaushalmodi/hello_musl). 
 
 ### Dynamic linking
 Building on Mac OSX with SSL is no fun, specially when your SSL isn't 1.1 [I managed to do with lots of help from the community] 
@@ -174,22 +302,21 @@ nim c -d:ssl  --dynlibOverride:ssl --dynlibOverride:crypto --threads:on --passC:
 
 
 ### Developing a redisclient
-We have a redis protocol keyvalue store [0-db](https://github.com/threefoldtech/0-db) that I needed to work with a while a go and I found a major [problem](https://github.com/nim-lang/redis/issues/11) with the implementation of the parser and the client in the official nim redis library, So I had to roll my own [parser](https://github.com/xmonader/nim-redisparser)/[client](https://github.com/xmonader/nim-redisclient) 
+We have a redis protocol keyvalue store [0-db](https://github.com/threefoldtech/0-db) that I needed to work against a while ago, and I found a major [problem](https://github.com/nim-lang/redis/issues/11) with the implementation of the parser and the client in the official nim redis library. So I had to roll my own [parser](https://github.com/xmonader/nim-redisparser)/[client](https://github.com/xmonader/nim-redisclient) 
 
 ### Developing asciitable library 
-To show human readable listing of the containers (id, name, open ports and image it's running from) It made sense to search for ascii table library in Nim (I found 0 libraries). I had to write my own [nim-asciitables](https://github.com/xmonader/nim-asciitables)
+To show a table listing all of the containers (id, name, open ports and image it's running from) I needed an ascii table library in Nim (I found 0 libraries). I had to write my own [nim-asciitables](https://github.com/xmonader/nim-asciitables)
 
 
 ### Nim-JWT 
-In the transport layer, we can sent JWT token for extra privileges on zero-os and for that I needed jwt support. I found out that jwt libraries are far from complete in Nim and had to try to fix it [ES384 support](https://github.com/yglukhov/nim-jwt/pull/1) with that fix I was able to get the claims, but I couldn't really verify it with the public key :( So I decided not to do client side validation and leave the validation to zero-os
+In the transport layer, we send a JWT token to request extra privileges on zero-os and for that, I needed jwt support. Again, jwt libraries are far from complete in Nim and had to try to fix it [ES384 support](https://github.com/yglukhov/nim-jwt/pull/1) with that fix I was able to get the claims, but I couldn't really verify it with the public key :( So I decided not to do client side validation and leave the validation to zero-os (the backend)
 
 ### Concurrency and communication
 In some parts of the application we want to add the ability to timeout after some period of time, and
 Nim supports multithreading using `threadpool` and async/await combo and has [HTTPBeast](https://github.com/dom96/httpbeast), So that shouldn't be a problem.
 
-When I saw Channels and spawn i thought it'd be as easy as goroutines in Go or fibers in Crystal
+When I saw `Channels` and `spawn` I thought it'd be as easy as goroutines in Go or fibers in Crystal
  
-
 So that was my first try with `spawn`
 
 {% highlight nim %}
@@ -237,10 +364,9 @@ when isMainModule:
 {% endhighlight %}
 
 
-However, Nim creator `Andreas Rumpf` said using Spawn/Channels is a bad idea and channels are meant to be used with Threads, So I tried to move it to threads
+However, The Nim creator `Andreas Rumpf` said using Spawn/Channels is a bad idea and channels are meant to be used with Threads, So I tried to move it to threads
 
 {% highlight nim %}
-
 
 import os, threadpool
 
@@ -310,11 +436,12 @@ when isMainModule:
 {% endhighlight %}
 
 
-I'm not fan of this  `passing ptrs`, `casting`, `.addr`
+I'm not a fan of this `passing pointers`, `casting`, `.addr`
 
 
 ### Macros
-Macros allows you to apply transformations on AST on compile time which is really amazing, but It can be very challenging to follow or even work with specially if it's not well documented and I feel they're kinda abused in the language resulting in half-baked libraries and macros playground.
+Macros allow you to apply transformations on AST on compile time which is really amazing, but It can be very challenging to follow or even work with specially if it's not well documented and I feel they're kinda abused in the language resulting in half-baked libraries and macros playground.
 
 
-Overall it's language with a great potential and its small team are doing an excellent job, give them a hand if you're interested in Nim, It's a great chance to help a language to grow and no one can blame you for reinventing the wheel :) 
+## Conclusion 
+Overall, Nim is a language with a great potential, and its small team is doing an excellent job. Just be prepared to write lots of missing libraries if you want to use it in production. It's a great chance to reinvent the wheel with no one blaming you :) 
