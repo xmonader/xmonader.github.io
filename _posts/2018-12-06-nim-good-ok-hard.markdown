@@ -136,15 +136,15 @@ Basically in sync execution multisync with remove Future, and await from the cod
 Everything you expect from the package manager, creating projects, custom tasks, managing dependencies and publishing (too coupled with github, but that's fine with me)
 
 
-## the OK
-These are the OK parts that can be improved in my opinion
-
-### Documentation
-There's a great community effort to provide [documentation](https://nim-lang.org/documentation.html). I hope we get more and more soft documentation and better quality on the official docs too.
-
 #### Generating documentation
-[nim doc](https://nim-lang.org/docs/docgen.html) is what I used to generate documentation for the project
-`nim doc --project src/zos.nim` will generate project documentation for `zos.nim` and all related modules for the project.
+[nim doc](https://nim-lang.org/docs/docgen.html) is the default tool in Nim to generate indexed and searchable documentation for the project
+
+Here's a nimble task to generate documentation
+{% highlight nim%}
+task genDocs, "Create code documentation for zos":
+    exec "nim doc --project src/zos.nim "
+{% endhighlight %}
+
 
 {% highlight bash %}
 nim doc src/zos.nim 
@@ -248,13 +248,19 @@ Hint: urandom [Processing]
 Hint: vbox [Processing]
 
 {% endhighlight %} 
-No idea why `generating docs` gives these errors so I went with my gut feeling and `--threads:on` and it works fine, pretty searchable documentation 
-
+No idea why `generating docs` gives these errors (most likely because I'm using threadpool in my code?) so I went with my gut feeling and `--threads:on` 
 {% highlight nim%}
 task genDocs, "Create code documentation for zos":
     exec "nim doc  --threads:on --project src/zos.nim "
 {% endhighlight %}
+and now it works just fine, and earned it's place in the Good parts.
 
+
+## the OK
+These are the OK parts that can be improved in my opinion
+
+### Documentation
+There's a great community effort to provide [documentation](https://nim-lang.org/documentation.html). I hope we get more and more soft documentation and better quality on the official docs too.
 
 
 ### Weird symbols / json
