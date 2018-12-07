@@ -253,7 +253,7 @@ No idea why `generating docs` gives these errors (most likely because I'm using 
 task genDocs, "Create code documentation for zos":
     exec "nim doc  --threads:on --project src/zos.nim "
 {% endhighlight %}
-and now it works just fine, and earned it's place in the Good parts.
+and now it works just fine, and earned its place in the Good parts.
 
 
 ## the OK
