@@ -125,7 +125,7 @@ proc readMany(this:Redis|AsyncRedis, count:int=1): Future[string] {.multisync.} 
   return data
 
 {% endhighlight %}
-Basically in sync execution multisync with remove Future, and await from the code definition and will leave them in case of async execution
+Basically in sync execution multisync will remove Future, and await from the code definition and will leave them in case of async execution
 
 ### The tooling
 
