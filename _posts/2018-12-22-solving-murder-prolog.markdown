@@ -391,16 +391,16 @@ Clue 3: The person with the bag, who was not barbara nor George, was not in the 
 % % 4. Clue 3: The person with the bag, who was not Barbara nor George, was not in the bathroom nor the dining room.
 % % Who had the bag in the room with them?
 
-    \+barbara=Bag, \+george=Bag, \+barbara=Bathroom, \+barbara=Dining, \+Bag=Bathroom, \+Bag=Dining,
+    \+barbara=Bag, \+george=Bag, \+Bag=Bathroom, \+Bag=Dining,
    
    
    
 ```
 - `Barbara` not the one with bag 
 - `george` isn't the one with the bag
-- `barbara` isn't in the bathroom or dining 
-- `george` isn't in the bathroom or dining
 - the one with the `Bag` isn't the one in the Bathroom AND isn't the one in the `Dining`
+
+> Edit: thanks to the nice people on reddit corrected the misinterpretation I had for clue no.3
 
 #### Clue 4
 Clue 4: The woman with the rope was found in the study.Who had the rope?
@@ -514,4 +514,4 @@ X = christine ;
 
 ```
 
-Code is available [here](https://github.com/xmonader/prolog-rands/blob/master/crime.pl) probably can be much better as I'm no expert in prolog :)
+Code is available [here](https://github.com/xmonader/prolog-rands/blob/master/crime.pl) probably can be much better as I'm no expert in prolog :) 
