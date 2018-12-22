@@ -351,7 +351,7 @@ murderer(X) :-
 To easily reason about the variables like `Bathroom, Dining, Firearm, Gas` we say 
 - Bathroom: the suspect (man or woman) in Bathroom
 - Firearm: the suspect (man or woman) has a Firearm
-.. etc, you can also think of it as a grid 
+.. etc, you can also think of it as a [grid](https://docs.google.com/spreadsheets/d/1pxmVaG6eMbkVg55rVYJquIVxaN3l09nrW6HJH7xdITM/edit#gid=0) 
 
 now we will keep adding constraints `after the last comma in our murderer rule`
 
