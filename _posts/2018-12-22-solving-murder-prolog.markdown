@@ -390,7 +390,9 @@ Clue 3: The person with the bag, who was not barbara nor George, was not in the 
 ```prolog
 % % 4. Clue 3: The person with the bag, who was not Barbara nor George, was not in the bathroom nor the dining room.
 % % Who had the bag in the room with them?
-    \+barbara=Bag, \+george=Bag, \+barbara=Bathroom, \+barbara=Dining, \+george=Dining, \+george=Bathroom,
+
+    \+barbara=Bag, \+george=Bag, \+barbara=Bathroom, \+barbara=Dining, \+Bag=Bathroom, \+Bag=Dining,
+   
    
    
 ```
@@ -398,6 +400,7 @@ Clue 3: The person with the bag, who was not barbara nor George, was not in the 
 - `george` isn't the one with the bag
 - `barbara` isn't in the bathroom or dining 
 - `george` isn't in the bathroom or dining
+- the one with the `Bag` isn't the one in the Bathroom AND isn't the one in the `Dining`
 
 #### Clue 4
 Clue 4: The woman with the rope was found in the study.Who had the rope?
@@ -493,12 +496,11 @@ writeanswers(Bathroom, Dining, Kitchen, Livingroom, Pantry, Study, Bag, Firearm,
  ```bash
  ?- [crime2].
 true.
-
 ?- murderer(X).
 KILLER IS :christine
 Bathroom: yolanda
-Dining: john
-Livingroom: george
+Dining: george
+Livingroom: john
 Pantry: christine
 Study: barbara
 Kitchen: robert
@@ -508,7 +510,7 @@ Rope: barbara
 Bag: john
 Poison: robert
 Firearm: george
-X = christine 
+X = christine ;
 
 ```
 
